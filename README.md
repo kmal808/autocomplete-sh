@@ -1,139 +1,112 @@
-Autocomplete.sh
-========================================================
+# autocomplete-sh
 
-## `--help` less, accomplish more: Command your terminal
+`autocomplete-sh`, or `acsh` for short, is an AI-assisted terminal autocomplete
+library and CLI with thin shell adapters for `bash` and `zsh`.
 
-> Command your terminal with intelligent suggestions
+Canonical repo: `https://github.com/kmal808/autocomplete-sh`
 
-Autocomplete.sh adds AI-powered command-line suggestions directly to your terminal. Just type `<TAB><TAB>` and it calls an LLM (OpenAI by default) to return the top suggestions for you.
+Forked from `closedloop-technologies/autocomplete-sh`; rewritten and maintained
+here as an independent project. See [NOTICE](./NOTICE) for provenance.
 
-![Autocomplete.sh Demo](https://github.com/user-attachments/assets/6f2a8f81-49b7-46e9-8005-c8a9dd3fc033)
+Suggested GitHub repo settings for description, homepage, and topics live in
+[REPO_METADATA.md](./REPO_METADATA.md). Release steps live in
+[RELEASING.md](./RELEASING.md).
 
-Use natural language without copying between CoPilot or ChatGPT
+## Architecture
 
-## Quick Start
+The project has three explicit layers:
 
-```bash
-wget -qO- https://autocomplete.sh/install.sh | bash
-```
+- a Go library for prompt construction, provider calls, and caching
+- a stable `autocomplete` CLI, with `acsh` installed as a shorthand alias
+- sourceable shell adapters in `autocomplete.sh` and `autocomplete.zsh`
 
-## Features
+The initial supported providers are `OpenAI` and `Ollama`.
 
-- **Context-Aware**: Considers terminal state, recent commands, and `--help` information
-- **Flexible**: Supports various LLM models, from fast and cheap to powerful
-- **Secure**: Enables local LLMs and sanitizes prompts for sensitive information
-- **Efficient**: Caches recent queries for speed and convenience
-- **Cost-Effective**: Monitors API call sizes and costs
+## Install
 
-## Supported Models
-
-We support OpenAI, Groq, Anthropic, and Ollama models. Configure your model with:
+Published install path:
 
 ```bash
-autocomplete model
+curl -fsSL https://raw.githubusercontent.com/kmal808/autocomplete-sh/main/docs/install.sh | sh
 ```
 
-![Model Selection](https://github.com/user-attachments/assets/6206963f-81c2-4d68-b054-6ec88969ba0c)
-
-## How It Works
-
-Autocomplete.sh provides faster, more accurate suggestions by considering:
-
-- Your machine's environment
-- Recently executed commands
-- Current directory contents
-- Command-specific help information
-
-View the full prompt with:
+Development install from a local checkout:
 
 ```bash
-autocomplete command --dry-run "your command here"
+./docs/install.sh dev
 ```
 
-## Tips and Tricks
+That builds `autocomplete`, creates the `acsh` alias, installs the matching
+shell adapter, and appends a marked block to your shell rc file.
 
-1. For command parameters: `ffmpeg # reformat video to fit youtube` then `<TAB><TAB>`
-2. For complex tasks: `# create a github repo, init a readme, and push it` then `<TAB><TAB>`
+## Build
+
+```bash
+go build ./cmd/autocomplete
+```
+
+## CLI
+
+```bash
+autocomplete complete --shell bash --line "git sta" --cwd "$PWD" --json
+acsh prompt --shell zsh --line "ffmpeg # shrink for email" --cwd "$PWD"
+autocomplete config init
+autocomplete config show
+autocomplete config set model gpt-4o-mini
+autocomplete doctor
+autocomplete cache clear
+autocomplete version
+```
+
+The shell adapters pass richer context through environment variables:
+
+- `AUTOCOMPLETE_HISTORY`
+- `AUTOCOMPLETE_RECENT_FILES`
+- `AUTOCOMPLETE_HELP`
+- `AUTOCOMPLETE_ENV`
 
 ## Configuration
 
-```bash
-source autocomplete config
-```
+Config lives at:
 
-![Configuration Options](https://github.com/user-attachments/assets/61578f27-594f-4bc4-ba86-c5f99a41e8a9)
+- `$AUTOCOMPLETE_CONFIG` if set
+- otherwise `$XDG_CONFIG_HOME/autocomplete-sh/config.json`
+- otherwise your platform config dir, for example
+  `~/Library/Application Support/autocomplete-sh/config.json` on macOS
 
-Update settings with:
+Environment variables override file values.
 
-```bash
-autocomplete config set <key> <value>
-```
+Common values:
 
-## Usage Tracking
+- `OPENAI_API_KEY`
+- `OLLAMA_HOST`
+- `AUTOCOMPLETE_PROVIDER`
+- `AUTOCOMPLETE_MODEL`
+- `AUTOCOMPLETE_TIMEOUT`
+- `AUTOCOMPLETE_CACHE_DIR`
+- `AUTOCOMPLETE_CACHE_TTL`
+- `AUTOCOMPLETE_CACHE_SIZE`
 
-```bash
-autocomplete usage
-```
+## Release Artifacts
 
-![Usage Statistics](https://github.com/user-attachments/assets/0fc611b9-fb4c-4f68-bf01-8e6ecdcf7410)
+Tagged releases are expected to publish tarballs named:
 
-## Use Cases
+- `autocomplete_darwin_arm64.tar.gz`
+- `autocomplete_darwin_amd64.tar.gz`
+- `autocomplete_linux_arm64.tar.gz`
+- `autocomplete_linux_amd64.tar.gz`
 
-- **Data Engineers**: Manipulate datasets efficiently
-- **Backend Developers**: Deploy updates swiftly
-- **Linux Users**: Navigate systems seamlessly
-- **Terminal Novices**: Build command-line confidence
-- **Efficiency Seekers**: Streamline repetitive tasks
-- **Documentation Seekers**: Quickly understand commands
+Those are the artifacts consumed by `docs/install.sh`.
 
-## Development
+## CI
 
-### Local Installation
+GitHub Actions runs:
 
-```bash
-git clone git@github.com:closedloop-technologies/autocomplete-sh.git
-ln -s $PWD/autocomplete.sh $HOME/.local/bin/autocomplete
-. autocomplete.sh install
-```
+- `.github/workflows/ci.yml` on pushes and pull requests
+- `.github/workflows/release.yml` on version tags
 
-We can also install the development version from the local file:
-
-```bash
-    ./docs/install.sh dev
-```
-
-### Testing
+## Tests
 
 ```bash
-sudo apt install bats
-bats tests
+go test ./...
 ```
-
-### Docker Testing
-
-```bash
-docker build -t autocomplete-sh .
-docker run --rm -e OPENAI_API_KEY=$OPENAI_API_KEY autocomplete-sh
-```
-
-## Maintainers
-
-Currently maintained by Sean Kruzel [@closedloop](https://github.com/closedloop) at [Closedloop.tech](https://Closedloop.tech)
-
-Contributions and bug fixes are welcome!
-
-## Support Open Source
-
-The best way to support Autocomplete.sh is to just use it!
-
-- [Just use it!](https://github.com/closedloop-technologies/autocomplete-sh?tab=readme-ov-file#quick-start)
-- [Share it!](https://x.com/intent/post?text=I+love+autocomplete.sh%21++I+just+press+%3CTAB%3E%3CTAB%3E+to+just+build+quickly+%40JustBuild_ai)
-- Star it!
-
-If you want to help me keep up the energy to build stuff like this, please:
-
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/skruzel)
-
-## License
-
-See the [MIT-LICENSE](./LICENSE) file for details.

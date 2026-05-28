@@ -1,3 +1,4 @@
-#!/bin/bash
+#!/bin/sh
+set -eu
 
-bats tests/
+go test ./...

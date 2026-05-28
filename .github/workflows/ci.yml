@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Verify formatting
+        run: |
+          set -eu
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "Go files are not formatted:"
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build CLI
+        run: go build ./cmd/autocomplete

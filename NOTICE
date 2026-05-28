@@ -1,0 +1,10 @@
+autocomplete-sh
+==============
+
+Forked from `closedloop-technologies/autocomplete-sh`.
+
+This repository preserves the upstream MIT license and project history, but the
+current codebase has been substantially rewritten and is maintained
+independently at:
+
+https://github.com/kmal808/autocomplete-sh

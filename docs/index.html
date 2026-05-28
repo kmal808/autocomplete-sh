@@ -3,663 +3,209 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Autocomplete.sh: Command Your Terminal</title>
-
-    <!-- Open Graph tags -->
-    <meta
-      property="og:title"
-      content="Autocomplete.sh: Command Your Terminal"
-    />
-    <meta
-      property="og:description"
-      content="Autocomplete.sh adds AI-powered command-line suggestions directly to your Bash or Zsh terminal. Just type <TAB><TAB> and it calls an LLM to return the top suggestions for you."
-    />
-    <meta
-      property="og:image"
-      content="https://autocomplete.sh/images/og-image.png"
-    />
-    <meta property="og:url" content="https://autocomplete.sh" />
-    <meta property="og:type" content="website" />
-
-    <!-- Twitter Card tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="Autocomplete.sh: Command Your Terminal"
-    />
-    <meta
-      name="twitter:description"
-      content="Autocomplete.sh adds AI-powered command-line suggestions directly to your Bash or Zsh terminal. Just type <TAB><TAB> and it calls an LLM to return the top suggestions for you."
-    />
-    <meta
-      name="twitter:image"
-      content="https://autocomplete.sh/autocomplete-logo.png"
-    />
-
-    <!-- Additional meta tags -->
+    <title>autocomplete-sh / acsh</title>
     <meta
       name="description"
-      content="Autocomplete.sh adds AI-powered command-line suggestions directly to your Bash or Zsh terminal. Just type <TAB><TAB> and it calls an LLM to return the top suggestions for you."
-    />
-    <meta
-      name="keywords"
-      content="autocomplete, terminal, CLI, AI, LLM, command-line, suggestions, productivity"
-    />
-    <meta name="author" content="ClosedLoop Technologies" />
-
-    <!-- Favicon -->
-    <link
-      rel="icon"
-      href="https://autocomplete.sh/favicon.ico"
-      type="image/x-icon"
-    />
-
-    <!-- Styles -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap"
-      rel="stylesheet"
+      content="autocomplete-sh (acsh) is an AI-assisted terminal autocomplete CLI and library for Bash and Zsh."
     />
     <style>
       :root {
-        --bg-color: #262326;
-        --text-color: #00ff00;
-        --accent-color: #121212;
-        --link-color: #00cc00;
+        --bg: #101419;
+        --panel: #151d25;
+        --text: #e9f0f5;
+        --muted: #9eb1c1;
+        --accent: #6cf2b8;
+        --accent-2: #7fb3ff;
+        --border: rgba(255, 255, 255, 0.08);
       }
 
-      .terminal-highlight {
-        color: #ff00ff;
-      }
-
-      .hero-gradient {
-        background: #121212;
-      }
-
-      [data-theme="light"] {
-        --bg-color: #f0f0f0;
-        --text-color: #1a1a1a;
-        --accent-color: #ffffff;
-        --link-color: #006600;
-        --error-color: #cc0000;
-        --warning-color: #cccc00;
-        --success-color: #006600;
+      * {
+        box-sizing: border-box;
       }
 
       body {
-        font-family: "Source Code Pro", monospace;
-        background-color: var(--bg-color);
-        color: var(--text-color);
+        margin: 0;
+        font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+          monospace;
+        background:
+          radial-gradient(circle at top left, rgba(127, 179, 255, 0.18), transparent 32%),
+          radial-gradient(circle at top right, rgba(108, 242, 184, 0.14), transparent 28%),
+          linear-gradient(180deg, #0c1116, #101419 28%, #0f151c);
+        color: var(--text);
       }
 
-      .terminal-bg {
-        background-color: var(--accent-color);
-        border: 1px solid var(--text-color);
-        position: relative;
-        cursor: pointer;
+      a {
+        color: var(--accent);
       }
 
-      .terminal-text {
-        color: var(--text-color);
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
       }
 
-      .blink {
-        animation: blink-animation 1s steps(5, start) infinite;
+      .hero {
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 32px;
+        background: rgba(21, 29, 37, 0.82);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
       }
 
-      @keyframes blink-animation {
-        to {
-          visibility: hidden;
-        }
-      }
-      @keyframes blink-animation-cursor {
-        0% {
-          opacity: 0;
-        }
-        50% {
-          opacity: 1;
-        }
-        100% {
-          opacity: 0;
-        }
-      }
-
-      @keyframes glitch {
-        0% {
-          transform: translate(0);
-        }
-        20% {
-          transform: translate(-2px, 2px);
-        }
-        40% {
-          transform: translate(-2px, -2px);
-        }
-        60% {
-          transform: translate(2px, 2px);
-        }
-        80% {
-          transform: translate(2px, -2px);
-        }
-        100% {
-          transform: translate(0);
-        }
-      }
-
-      .glitch-text {
-        animation: glitch 0.3s infinite;
-        color: #00ff00;
-        text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
-      }
-
-      .blink-cursor {
-        display: inline-block;
-        width: 0.5em;
-        height: 1em;
-        background-color: #00ff00;
-        animation: blink-animation-cursor 1s step-end infinite;
-        vertical-align: text-bottom;
-      }
-      .video-container {
-        text-align: center;
-        align-items: center;
-        min-height: 320px;
-      }
-
-      .copyable {
-        position: relative;
-      }
-
-      .cta-button {
-        display: inline-block;
-        background-color: var(--link-color);
-        color: var(--bg-color);
-        padding: 0.8rem 1.5rem;
-        border-radius: 5px;
-        font-weight: bold;
-        text-align: center;
-        margin: 1rem 0;
-        transition: background-color 0.3s, color 0.3s;
+      .eyebrow {
+        color: var(--accent);
+        letter-spacing: 0.12em;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        font-size: 12px;
+        margin-bottom: 16px;
       }
 
-      .cta-button:hover {
-        background-color: var(--text-color);
-        color: var(--bg-color);
+      h1, h2 {
+        margin: 0 0 12px;
       }
 
-      /* Add these new styles */
-      .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      h1 {
+        font-size: clamp(36px, 6vw, 64px);
+        line-height: 0.95;
       }
 
-      .nav-menu {
-        display: flex;
-        align-items: center;
-        /* background: #262326; */
+      h2 {
+        font-size: 24px;
       }
 
-      .nav-menu a {
-        margin-left: 1rem;
+      p {
+        color: var(--muted);
+        line-height: 1.7;
       }
 
-      .github-icon {
-        width: 24px;
-        height: 24px;
-        fill: var(--text-color);
+      .tagline {
+        font-size: 18px;
+        max-width: 52rem;
       }
 
-      @media (max-width: 640px) {
-        .nav-menu a:not(.github-link) {
-          display: none;
-        }
+      .grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        margin-top: 28px;
+      }
 
-        .nav-menu {
-          margin-left: auto;
-        }
+      .card {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 18px;
+        padding: 20px;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        padding: 18px;
+        border-radius: 16px;
+        background: #0b1015;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--text);
+      }
+
+      .command {
+        color: var(--accent);
+      }
+
+      .cta {
+        display: inline-flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 12px 16px;
+        border-radius: 999px;
+        text-decoration: none;
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #081017;
+        font-weight: 700;
+        border-color: transparent;
+      }
+
+      .section {
+        margin-top: 36px;
+      }
+
+      .small {
+        font-size: 14px;
       }
     </style>
-
-    <!-- Google Analytics -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-35GPFYRQJQ"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-35GPFYRQJQ");
-    </script>
   </head>
-
-  <body class="text-gray-100">
-    <header
-      class="py-6 border-b border-gray-700 sticky top-0 bg-opacity-90 backdrop-filter backdrop-blur-lg z-50 menu-bg"
-    >
-      <div class="container mx-auto px-4">
-        <div class="header-container">
-          <div class="text-2xl sm:text-3xl terminal-text font-bold">
-            AUTOCOMPLETE.sh
-          </div>
-          <nav class="nav-menu text-center">
-            <a
-              href="#how-it-works"
-              class="terminal-text hover:terminal-highlight"
-              >How&nbsp;It Works</a
-            >
-            <a
-              href="#getting-started"
-              class="terminal-text hover:terminal-highlight"
-              >Get Started</a
-            >
-            <a href="#use-cases" class="terminal-text hover:terminal-highlight"
-              >Use Cases</a
-            >
-            <a
-              href="https://github.com/closedloop-technologies/autocomplete-sh"
-              class="github-link"
-              title="Autocomplete on Github"
-            >
-              <svg
-                class="github-icon"
-                viewBox="0 0 16 16"
-                version="1.1"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-                ></path>
-              </svg>
-            </a>
-          </nav>
-        </div>
-      </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-12">
-      <section
-        id="hero"
-        class="hero-gradient rounded-lg shadow-2xl mb-24 p-8 md:p-12"
-      >
-        <div class="flex flex-col md:flex-row items-center">
-          <div class="w-full md:w-1/2 mb-8 md:mb-0">
-            <h1 class="text-4xl lg:text-6xl mb-6 terminal-text font-bold">
-              Command Your Terminal
-            </h1>
-            <p class="text-xl md:text-2xl mb-8 terminal-highlight">
-              <span class="blink">&gt;</span> --help less, accomplish more with Bash & Zsh
-            </p>
-            <a href="#getting-started" class="cta-button">Get Started</a>
-          </div>
-          <div class="w-full md:w-1/2 flex justify-center">
-            <img
-              src="https://github.com/user-attachments/assets/6f2a8f81-49b7-46e9-8005-c8a9dd3fc033"
-              alt="Autocomplete.sh Demo"
-              class="w-full h-auto rounded-lg shadow-lg border-2 border-gray-700"
-            />
-          </div>
-        </div>
-      </section>
-      <section id="features" class="mb-24">
-        <h2 class="text-3xl sm:text-4xl mb-6 terminal-text font-bold">
-          AI-powered CLI suggestions directly in your terminal
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Lightning Fast
-            </h3>
-            <p>
-              Double <span class="terminal-highlight">TAB</span> to instantly
-              summon LLM-powered suggestions.
-            </p>
-          </div>
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Context-Aware
-            </h3>
-            <p>
-              Leverages your environment, history, and command help for smarter
-              suggestions.
-            </p>
-          </div>
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              LLM Agnostic
-            </h3>
-            <p>Choose from various LLMs to balance speed, power, and cost.</p>
-          </div>
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Privacy-Focused
-            </h3>
-            <p>
-              Local LLM support and prompt sanitization keep your data secure.
-            </p>
-            <p>Open Source &mdash; MIT Licensed</p>
-          </div>
-        </div>
-      </section>
-      <section id="how-it-works" class="mb-24">
-        <h2 class="text-3xl sm:text-4xl mb-6 terminal-text font-bold">
-          How It Works
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="video-container relative w-full pt-[56.25%]">
-            <iframe
-              title="Autocomplete.sh Trailer"
-              class="w-full h-full rounded-lg shadow-lg border-2 border-gray-700"
-              src="https://www.youtube.com/embed/IAgkjerCvz8?si=CDAIynVlp1zTdXss"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allowfullscreen
-            ></iframe>
-          </div>
-          <div class="video-container relative w-full pt-[56.25%]">
-            <iframe
-              title="Autocomplete.sh Walkthrough"
-              class="w-full h-full rounded-lg shadow-lg border-2 border-gray-700"
-              src="https://www.youtube.com/embed/dS1-qh_dxac?si=mrVp0O6EyZmP4XpY"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allowfullscreen
-            ></iframe>
-          </div>
-        </div>
-      </section>
-      <section id="getting-started" class="mb-24">
-        <h2 class="text-3xl sm:text-4xl mb-6 terminal-text font-bold">
-          Quick Start
-        </h2>
-        <div class="terminal-bg p-6 rounded-md">
-          <p class="mb-4">Install Autocomplete.sh with a single command (works with both Bash and Zsh):</p>
-          <div class="relative copyable">
-            <pre
-              class="text-white py-4 rounded overflow-x-auto whitespace-pre text-left"
-              id="install-command"
-            ><span class="text-white">$</span> <code class="text-green-400">wget -qO- https://autocomplete.sh/install.sh | bash<span class="blink-cursor"></span></code></pre>
-
-            <button
-              id="install-command-button"
-              class="hidden sm:flex absolute top-3 right-2 px-2 py-1 text-sm text-white rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-              onclick="copyToClipboard('wget -qO- https://autocomplete.sh/install.sh | bash')"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                <path
-                  d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                />
-              </svg>
-            </button>
-          </div>
-          <p class="mt-4 text-sm text-gray-400">Click code above to copy</p>
-        </div>
-      </section>
-      <section id="use-cases" class="mb-24">
-        <h2 class="text-3xl sm:text-4xl mb-6 terminal-text font-bold">
-          Use Cases
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Data Engineers
-            </h3>
-            <p>Manipulate datasets efficiently</p>
-          </div>
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Backend Developers
-            </h3>
-            <p>Deploy updates swiftly</p>
-          </div>
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Shell Users
-            </h3>
-            <p>Navigate Bash & Zsh terminals seamlessly</p>
-          </div>
-          <div class="terminal-bg p-6">
-            <h3 class="text-xl font-semibold mb-3 terminal-highlight">
-              Terminal Novices
-            </h3>
-            <p>Build command-line confidence</p>
-          </div>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <div class="eyebrow">autocomplete-sh / acsh</div>
+        <h1>Command Your Terminal With Context</h1>
+        <p class="tagline">
+          <strong>autocomplete-sh</strong>, or <strong>acsh</strong> for short,
+          is an AI-assisted terminal autocomplete library and CLI for Bash and Zsh.
+          It is now maintained as an independent fork at
+          <a href="https://github.com/kmal808/autocomplete-sh">github.com/kmal808/autocomplete-sh</a>.
+        </p>
+        <div class="cta">
+          <a class="button primary" href="https://github.com/kmal808/autocomplete-sh">Open Repo</a>
+          <a class="button" href="https://github.com/kmal808/autocomplete-sh/releases">Latest Releases</a>
         </div>
       </section>
 
-      <section id="supported-models" class="mb-24">
-        <h2 class="text-3xl sm:text-4xl mb-6 terminal-text font-bold">
-          Supported Language Models
-        </h2>
-        <div class="terminal-bg p-6">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center mb-6">
-            <div class="p-4">
-              <h3 class="text-lg font-semibold terminal-highlight">OpenAI</h3>
-            </div>
-            <div class="p-4">
-              <h3 class="text-lg font-semibold terminal-highlight">Groq</h3>
-            </div>
-            <div class="p-4">
-              <h3 class="text-lg font-semibold terminal-highlight">
-                Anthropic
-              </h3>
-            </div>
-            <div class="p-4">
-              <h3 class="text-lg font-semibold terminal-highlight">Ollama</h3>
-            </div>
-          </div>
-          <div class="max-w-3xl mx-auto">
-            <p class="mb-4 text-left">To change the active model:</p>
-            <pre
-              class="p-2 rounded mb-12 overflow-x-auto whitespace-pre-wrap break-words text-left"
-            >$ <code class="text-green-400">autocomplete model</code><span class="blink-cursor"></span></pre>
-            <img
-              src="/images/autocomplete-model.gif"
-              alt="Supported Language Models"
-              class="w-full h-auto rounded-lg shadow-lg border-2 border-gray-700"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section id="configuration" class="mb-24">
-        <h2 class="text-3xl sm:text-4xl mb-6 terminal-text font-bold">
-          Configuration
-        </h2>
-        <div class="terminal-bg p-6">
-          <div class="max-w-3xl mx-auto">
-            <p class="mb-4 text-left">View current settings:</p>
-            <pre
-              class="p-2 rounded mb-12 overflow-x-auto whitespace-pre-wrap break-words text-left"
-            >$ <code class="text-green-400">source autocomplete config</code><span class="blink-cursor"></span></pre>
-            <img
-              src="/images/autocomplete-config.png"
-              alt="Autocomplete Configuration Screen"
-              class="w-full h-auto rounded-lg shadow-lg border-2 border-gray-700"
-            />
-            <p class="mb-4 text-left">Update settings:</p>
-            <pre
-              class="p-2 rounded overflow-x-auto whitespace-pre-wrap break-words text-left"
-            >$ <code class="text-green-400">autocomplete config set &lt;key&gt; &lt;value&gt;<span class="blink-cursor"></span></code>
-              </pre>
-          </div>
-        </div>
-      </section>
-      <section id="support" class="mb-8">
-        <h2 class="text-4xl mb-6 text-green-500 font-bold terminal-text">
-          Support Open Source
-        </h2>
-        <div class="terminal-bg p-6">
-          <p class="mb-6 text-lg text-white">
-            The best way to support Autocomplete.sh is to
-            <a class="text-green-400 font-bold" href="#getting-started"
-              >just use it!</a
-            >
+      <section class="section grid">
+        <article class="card">
+          <h2>Install</h2>
+          <pre><span class="command">curl -fsSL https://raw.githubusercontent.com/kmal808/autocomplete-sh/main/docs/install.sh | sh</span></pre>
+          <p class="small">
+            Installs the latest release binary, adds the <code>acsh</code> alias,
+            and sources the right shell adapter in your rc file.
           </p>
+        </article>
 
-          <div class="flex flex-wrap items-center gap-4 mb-6">
-            <a
-              href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-              data-size="large"
-              data-text="I love this -> "
-              data-via="JustBuild_AI"
-              data-related="seankruzel"
-              data-show-count="false"
-              class="bg-white h-10 text-black px-4 py-2 rounded-sm hover:bg-gray-800 transition-colors flex items-center gap-2 border border-8 border-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-twitter-x"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865l8.875 11.633Z"
-                />
-              </svg>
-              Post
-            </a>
-            <span class="gap-2">
-              <iframe
-                title="GitHub Stars"
-                src="https://ghbtns.com/github-btn.html?user=closedloop-technologies&repo=autocomplete-sh&type=star&count=true&size=large"
-                class="h-10"
-                width="170"
-                height="30"
-              ></iframe>
-            </span>
-          </div>
-
-          <p class="mb-4 text-lg text-white">
-            If you want to help keep up the energy to build stuff like this,
-            please:
+        <article class="card">
+          <h2>Configure</h2>
+          <pre><span class="command">export OPENAI_API_KEY='your-key'
+autocomplete config init
+autocomplete doctor</span></pre>
+          <p class="small">
+            Config is stored in <code>~/Library/Application Support/autocomplete-sh/config.json</code>
+            on macOS unless you override it with <code>AUTOCOMPLETE_CONFIG</code>.
           </p>
-          <a href="https://www.buymeacoffee.com/skruzel" class="inline-block">
-            <img
-              src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
-              alt="Buy Me A Coffee"
-            />
-          </a>
-        </div>
+        </article>
+
+        <article class="card">
+          <h2>Use</h2>
+          <pre><span class="command">autocomplete complete --shell zsh --line "git sta" --cwd "$PWD"
+acsh prompt --shell zsh --line "ffmpeg # shrink for email" --cwd "$PWD"</span></pre>
+          <p class="small">
+            The shell adapters collect history, recent files, and command help,
+            then ask the CLI for suggestions.
+          </p>
+        </article>
+      </section>
+
+      <section class="section card">
+        <h2>What Changed</h2>
+        <p>
+          This fork no longer depends on the original shell-script-only architecture.
+          The current codebase is a Go library plus CLI, with thin Bash and Zsh adapters,
+          OpenAI and Ollama providers, file-backed caching, and testable release artifacts.
+        </p>
+        <p class="small">
+          Fork provenance is preserved in the repository license and NOTICE file.
+        </p>
       </section>
     </main>
-
-    <footer class="pb-8">
-      <div class="mx-auto px-2 text-center">
-        <a href="https://closedloop.tech" target="_blank"
-          >&copy; 2024 ClosedLoop Technologies LLC</a
-        >
-        All Rights Reserved | MIT License
-      </div>
-    </footer>
-
-    <script>
-      function toggleTheme() {
-        const body = document.body;
-        if (body.getAttribute("data-theme") === "light") {
-          body.removeAttribute("data-theme");
-        } else {
-          body.setAttribute("data-theme", "light");
-        }
-      }
-      function copyToClipboard(text) {
-        if (navigator.clipboard) {
-          navigator.clipboard
-            .writeText(text)
-            .then(() => {
-              const glitchElement = document.querySelector(
-                "#install-command code"
-              );
-              if (glitchElement) {
-                const originalCodeContent = glitchElement.innerHTML;
-                glitchElement.innerHTML =
-                  '<code class="terminal-highlight">Code copied to clipboard!</code>';
-
-                setTimeout(() => {
-                  glitchElement.innerHTML = "<code>Hack the planet!</code>";
-                  glitchElement.classList.add("glitch-text");
-
-                  // Position the element
-                  glitchElement.style.position = "absolute";
-                  glitchElement.style.top = "50%";
-                  glitchElement.style.left = "50%";
-                  glitchElement.style.transform = "translate(-50%, -50%)";
-                  setTimeout(() => {
-                    glitchElement.classList.remove("glitch-text");
-                    glitchElement.style = "";
-                    glitchElement.innerHTML = originalCodeContent;
-                  }, 1500);
-                }, 1000);
-              } else {
-                alert("Code copied to clipboard!");
-              }
-
-              const button = document.querySelector("#install-command-button");
-              if (!button) {
-                console.error("install-command-button not found");
-                return
-              }
-              const originalContent = button.innerHTML;
-              button.innerHTML =
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>';
-              button.classList.add("terminal-highlight");
-              setTimeout(() => {
-                button.innerHTML = originalContent;
-                button.classList.remove("terminal-highlight");
-              }, 2000);
-            })
-            .catch((err) => {
-              console.error("Failed to copy: ", err);
-            });
-        }
-      }
-
-      document.querySelectorAll(".copyable").forEach((block) => {
-        block.addEventListener("click", () => {
-          copyToClipboard(
-            "wget -qO- https://autocomplete.sh/install.sh | bash"
-          );
-        });
-      });
-
-      // Intersection Observer for animations
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("animate-fade-in");
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
-
-      document.querySelectorAll(".animate-fade-in").forEach((el) => {
-        el.classList.remove("animate-fade-in");
-        observer.observe(el);
-      });
-    </script>
-    <script
-      async
-      src="https://platform.twitter.com/widgets.js"
-      charset="utf-8"
-    ></script>
   </body>
 </html>

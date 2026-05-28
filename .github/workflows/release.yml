@@ -1,0 +1,67 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build archive
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          set -eu
+          mkdir -p dist
+          bin_dir="build/${GOOS}_${GOARCH}"
+          mkdir -p "$bin_dir"
+          go build -o "$bin_dir/autocomplete" ./cmd/autocomplete
+          tar -C "$bin_dir" -czf "dist/autocomplete_${GOOS}_${GOARCH}.tar.gz" autocomplete
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: autocomplete-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/autocomplete_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Flatten artifacts
+        run: |
+          set -eu
+          mkdir -p release
+          find dist -name '*.tar.gz' -exec cp {} release/ \;
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.tar.gz
